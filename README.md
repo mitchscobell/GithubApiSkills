@@ -11,10 +11,10 @@ For the part you do on your own: write some code that will retrieve every pull r
 
 Do not use a pre-existing Github library. We want to see you interact directly with the Github API and use JavaScript or Typescript, ideally as a NodeJS console app. Other than that, use whatever tools (frameworks, etc) you like, structure your code however you like, etc. We care much more about how you solve technical problems generally than any specific knowledge and we want to see you at your best.
 
-Here are some resources: 
-Ramda organization: https://github.com/ramda
-Github API docs: https://developer.github.com/v3/  
-If you want, feel free to use the new GraphQL API instead of the v3 REST API: https://developer.github.com/v4/  
+## Here are some resources: 
+* Ramda organization: https://github.com/ramda
+* Github API docs: https://developer.github.com/v3/  
+* If you want, feel free to use the new GraphQL API instead of the v3 REST API: https://developer.github.com/v4/  
 
 You will receive an invitation to join a private channel in our public Slack workspace with some Redox engineers. This is the best place to direct any questions you may have about the coding task and where you will submit the code. Because we value work/life balance, you can expect Slack responses during normal business hours (9AM ET to 5PM PT) within a few hours.
 
