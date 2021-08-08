@@ -29,3 +29,8 @@ When you complete the take home task, please:
 Once we get a chance to review the project, we will be in touch about next steps. 
 
 Please feel free to ask questions, and good luck!
+
+## Resources
+* https://galdin.dev/blog/writing-a-node-console-app-in-typescript/
+* [Max Schwarzmuller's Typescript Course](https://www.udemy.com/course/the-complete-nodejs-developer-course-2/)
+* [Andrew Mead's Node.js Developer Course](https://www.udemy.com/course/the-complete-nodejs-developer-course-2/)
