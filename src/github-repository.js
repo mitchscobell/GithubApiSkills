@@ -6,19 +6,29 @@ const fetch = require("node-fetch");
 nconf.argv().env().file({ file: "./appconfig.json" });
 const apiConfiguration = nconf.get("apiConfiguration");
 
+let getQuery = function (typeOfQuery) {
+  return `
+  query {
+    repository(
+      owner:"${apiConfiguration.owner}", 
+      name:"${apiConfiguration.name}") {
+        ${typeOfQuery}
+    }
+  }`;
+};
+
 /// write some code that will retrieve every pull request
 /// for the Ramda organization using the Github web API
 /// and store the results in memory
 const getPullRequests = function () {
   // query for pulling info
-  const query = `
-    query {
-      repository(owner:"${apiConfiguration.owner}", name:"${apiConfiguration.name}") {
-        issues(states:CLOSED) {
-          totalCount
-        }
-      }
-    }`;
+  const typeOfQuery = `
+  pullRequests {
+    totalCount
+  }
+  `;
+
+  const query = getQuery(typeOfQuery);
 
   fetch("https://api.github.com/graphql", {
     method: "POST",
@@ -32,7 +42,7 @@ const getPullRequests = function () {
     .catch((error) => console.error(error));
 };
 
-getPullRequests();
+module.exports = getPullRequests;
 
 // TODO abstract away the method calls
 

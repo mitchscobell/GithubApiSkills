@@ -1,1 +1,3 @@
-console.log('hello world');
+const getPullRequests = require('./github-repository.js');
+
+getPullRequests();
