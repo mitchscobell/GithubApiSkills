@@ -1,8 +1,13 @@
+const fs = require("fs");
+const nconf = require("nconf");
 const fetch = require("node-fetch");
-const accessToken = "your_access_token_from_github";
-const owner = "isaacs"; // TODO swap for Ramda organization
-const name = "github";
-const url = "https://api.github.com/graphql";
+
+// import config file
+nconf.argv().env().file({ file: "./appconfig.json" });
+
+const apiConfiguration = nconf.get("apiConfiguration");
+
+console.log(apiConfiguration);
 
 /// write some code that will retrieve every pull request
 /// for the Ramda organization using the Github web API
@@ -10,7 +15,6 @@ const url = "https://api.github.com/graphql";
 const getPullRequests = function () {
   return "";
 };
-
 
 //TODO abstract away the method calls
 

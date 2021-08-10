@@ -1,0 +1,9 @@
+{
+    "apiConfiguration":
+      {
+          "url":"https://api.github.com/graphql",
+          "accessToken":"tbd",
+          "owner":"isaacs",
+          "name":"github"
+      }
+  }
