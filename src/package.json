@@ -1,0 +1,11 @@
+{
+  "name": "redox-skills",
+  "version": "1.0.0",
+  "description": "redox skills challenge",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mitch Scobell",
+  "license": "ISC"
+}
