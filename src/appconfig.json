@@ -2,8 +2,8 @@
     "apiConfiguration":
       {
           "url":"https://api.github.com/graphql",
-          "accessToken":"tbd",
-          "owner":"isaacs",
-          "name":"github"
+          "accessToken":"",
+          "owner":"ramda",
+          "name":"ramda"
       }
   }
