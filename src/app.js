@@ -1,3 +1,4 @@
-const getPullRequests = require('./github-repository.js');
+const {getAllRepositoriesForOwner, getPullRequests} = require('./github-repository.js');
 
-getPullRequests();
+//getAllRepositoriesForOwner;
+//getPullRequests;
