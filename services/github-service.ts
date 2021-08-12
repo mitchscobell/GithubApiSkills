@@ -3,11 +3,9 @@ import { GithubRepository } from "../models/github-repository.model";
 import { PullRequest } from "../models/pull-request.model";
 
 export class GithubService {
-  private readonly token: string;
   private readonly urlRoot: string;
 
-  constructor() {
-    this.token = process.env.github_access_token;
+  constructor(private token: string) {
     this.urlRoot = `https://api.github.com`;
   }
 

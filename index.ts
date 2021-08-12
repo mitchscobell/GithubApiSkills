@@ -1,10 +1,19 @@
 import { GithubService } from "./services/github-service";
 const chalk = require("chalk");
+const dotenv = require("dotenv").config();
 
 async function main(): Promise<void> {
   // initialize the console
   const log = console.log;
   console.clear();
+
+  if (dotenv.error) {
+    throw dotenv.error;
+  }
+
+  if (!process.env.GITHUB_ACCESS_TOKEN) {
+    throw new Error("GITHUB_ACCESS_TOKEN Environment Variable is not defined")
+  }
 
   const org: string = "ramda";
 
@@ -15,7 +24,7 @@ async function main(): Promise<void> {
       "\n"
   );
 
-  const service = new GithubService();
+  const service = new GithubService(process.env.GITHUB_ACCESS_TOKEN);
 
   const repositories = await service.getRepositoriesAndPullRequestsForOrg(org);
 
