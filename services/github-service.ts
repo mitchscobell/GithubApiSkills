@@ -57,6 +57,7 @@ export class GithubService {
     repo: string
   ): Promise<PullRequest[]> {
     try {
+      //TODO parameterize state into an enum of the states
       const url = `${this.urlRoot}/repos/${org}/${repo}/pulls?state=all`;
       const response = await this.getPullRequests(url);
 
@@ -72,6 +73,8 @@ export class GithubService {
     try {
       const response = await axios.get(url, this.getRequestOptions());
       const linkHeaders = response.headers.link;
+
+      //TODO parameterize state into an enum of the states
 
       // iterate through the pages recursively
       if (linkHeaders) {
