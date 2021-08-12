@@ -57,7 +57,7 @@ export class GithubService {
     repo: string
   ): Promise<PullRequest[]> {
     try {
-      const url = `${this.urlRoot}/repos/${org}/${repo}/pulls`;
+      const url = `${this.urlRoot}/repos/${org}/${repo}/pulls?state=all`;
       const response = await this.getPullRequests(url);
 
       return response;
@@ -78,7 +78,7 @@ export class GithubService {
         let parsedLinkHeaders = parse(linkHeaders);
         if (parsedLinkHeaders.next) {
           const nextPage = await this.getPullRequests(
-            parsedLinkHeaders.next.url
+            parsedLinkHeaders.next.url + '&state=all'
           );
           response.data.push(...nextPage);
         }
