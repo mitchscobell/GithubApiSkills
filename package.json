@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/mitchscobell/RedoxSkills#readme",
   "dependencies": {
+    "chalk": "^4.1.2",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
