@@ -1,4 +1,4 @@
-# Redox Skills
+# Github API Test
 
 ## How to run
 rename `empty.env` file to `.env` and paste in your github access token.
@@ -31,7 +31,7 @@ Do not use a pre-existing Github library. We want to see you interact directly w
 - Github API docs: https://developer.github.com/v3/
 - If you want, feel free to use the new GraphQL API instead of the v3 REST API: https://developer.github.com/v4/
 
-You will receive an invitation to join a private channel in our public Slack workspace with some Redox engineers. This is the best place to direct any questions you may have about the coding task and where you will submit the code. Because we value work/life balance, you can expect Slack responses during normal business hours (9AM ET to 5PM PT) within a few hours.
+You will receive an invitation to join a private channel in our public Slack workspace with some engineers. This is the best place to direct any questions you may have about the coding task and where you will submit the code. Because we value work/life balance, you can expect Slack responses during normal business hours (9AM ET to 5PM PT) within a few hours.
 
 ## Please complete the task by one week from today (though let us know now if you'll need more time and it's likely we can accommodate you!).
 

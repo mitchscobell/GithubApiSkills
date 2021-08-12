@@ -20,9 +20,11 @@
   "dependencies": {
     "axios": "^0.21.1",
     "chalk": "^4.1.2",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "parse-link-header": "^1.0.1"
   },
   "devDependencies": {
-    "@types/node": "^16.6.0"
+    "@types/node": "^16.6.0",
+    "@types/parse-link-header": "^1.0.0"
   }
 }
