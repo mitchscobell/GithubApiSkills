@@ -11,22 +11,26 @@ async function main(): Promise<void> {
   log(
     chalk.white.bgRed("Loading data for ") +
       chalk.white.bgGreen.bold(org) +
-      chalk.white.bgRed(" organization") + '\n'
+      chalk.white.bgRed(" organization") +
+      "\n"
   );
 
   const service = new GithubService();
 
-  let repositories = await service.getRepositoriesForOrg(org);
+  const repositories = await service.getRepositoriesForOrg(org);
 
   let amountOfPullRequests = 0;
 
-  for (let repo of repositories) {
+  for (var repo of repositories) {
     log(chalk.white.bgBlue("Repository Name:") + chalk.cyan(` ${repo.name}`));
-    let repoInfo = await service.getPullRequestsForOrgAndRepo(org, repo.name);
+
+    const repoInfo = await service.getPullRequestsForOrgAndRepo(org, repo.name);
+
     log(
       chalk.blue("Number of Pull Requests:") +
         chalk.magenta(` ${repoInfo.length}`)
     );
+
     amountOfPullRequests += repoInfo.length;
   }
 
