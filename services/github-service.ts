@@ -3,32 +3,32 @@ import { GithubRepository } from "../models/github-repository.model";
 import { PullRequest } from "../models/pull-request.model";
 
 export class GithubService {
-  private token: string;
+  private readonly token: string;
+  private readonly urlRoot: string;
 
   constructor() {
-    // pulls access token from environment variable
     this.token = process.env.github_access_token;
+    this.urlRoot = `https://api.github.com`;
   }
 
   public async getRepositoriesAndPullRequestsForOrg(
     org: string
   ): Promise<GithubRepository[]> {
-    const repos = await this.getRepositoriesForOrg(org);
+    const repositories = await this.getRepositoriesForOrg(org);
 
-    for (var repo of repos) {
+    for (var repo of repositories) {
       repo.pullRequests = await this.getPullRequestsForOrgAndRepo(
         org,
         repo.name
       );
     }
-
-    return repos;
+    return repositories;
   }
 
   public async getRepositoriesForOrg(org: string): Promise<GithubRepository[]> {
     try {
-      let response = await axios.get(
-        `https://api.github.com/orgs/${org}/repos`,
+      const response = await axios.get(
+        `${this.urlRoot}/orgs/${org}/repos`,
         this.getRequestOptions()
       );
 
@@ -43,8 +43,8 @@ export class GithubService {
     repo: string
   ): Promise<PullRequest[]> {
     try {
-      let response = await axios.get(
-        `https://api.github.com/repos/${org}/${repo}/pulls`,
+      const response = await axios.get(
+        `${this.urlRoot}/repos/${org}/${repo}/pulls`,
         this.getRequestOptions()
       );
 
