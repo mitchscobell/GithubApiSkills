@@ -27,7 +27,6 @@ export class GithubService {
 
   public async getRepositoriesForOrg(org: string): Promise<GithubRepository[]> {
     try {
-      console.log(`${this.urlRoot}/orgs/${org}/repos`);
       const response = await axios.get(
         `${this.urlRoot}/orgs/${org}/repos`,
         this.getRequestOptions()
