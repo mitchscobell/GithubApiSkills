@@ -11,7 +11,7 @@ async function main(): Promise<void> {
   for (let repo of repositories) {
     console.log(`Name: ${repo.name}`);
     let repoInfo = await service.getPullRequestsForOrgAndRepo(org, repo.name);
-    console.log(`Amount of Pull Requests: ${repoInfo.length}\n`)
+    console.log(`Amount of Pull Requests: ${repoInfo.length}\n`);
     amountOfPullRequests += repoInfo.length;
   }
 

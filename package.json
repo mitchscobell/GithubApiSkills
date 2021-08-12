@@ -19,5 +19,9 @@
   "homepage": "https://github.com/mitchscobell/RedoxSkills#readme",
   "dependencies": {
     "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.6.0",
+    "@types/node-fetch": "^2.5.12"
   }
 }

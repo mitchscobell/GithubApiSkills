@@ -1,6 +1,11 @@
 # Redox Skills
 
 ## How to run
+Set your access token in env variables (for example PowerShell)
+``` ps
+$Env:github_access_token = "<my token here!>"
+```
+
 Set the watch on the ts files
 ```
 tsc index.ts -w
