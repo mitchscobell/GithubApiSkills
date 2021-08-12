@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import fetch, { RequestInit } from "node-fetch";
 import { GithubRepository } from "../models/github-repository.model";
 import { PullRequest } from "../models/pull-request.model";
 
@@ -12,11 +12,10 @@ export class GithubService {
 
   public async getRepositoriesForOrg(org: string): Promise<GithubRepository[]> {
     try {
-      let response = await fetch(`https://api.github.com/orgs/${org}/repos`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      });
+      let response = await fetch(
+        `https://api.github.com/orgs/${org}/repos`,
+        this.getRequestOptions()
+      );
 
       return response.json();
     } catch (error) {
@@ -31,16 +30,20 @@ export class GithubService {
     try {
       let response = await fetch(
         `https://api.github.com/repos/${org}/${repo}/pulls`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        }
+        this.getRequestOptions()
       );
 
       return response.json();
     } catch (error) {
       console.error(error);
     }
+  }
+
+  private getRequestOptions(): RequestInit {
+    return {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+    };
   }
 }
