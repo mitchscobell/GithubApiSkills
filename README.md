@@ -1,5 +1,15 @@
 # Redox Skills
 
+## How to run
+Set the watch on the ts files
+```
+tsc index.ts -w
+```
+Run the entry point
+```
+node .\index.js
+```
+
 ## What
 
 For the coding task, we'll build a tool to analyze pull request traffic for a Github organization.

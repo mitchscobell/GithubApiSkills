@@ -1,0 +1,23 @@
+{
+  "name": "redoxskills",
+  "version": "1.0.0",
+  "description": "For the coding task, we'll build a tool to analyze pull request traffic for a Github organization.\r For the part you do on your own: write some code that will retrieve every pull request for the Ramda organization using the Github web API and store the results in memory. When we pair, we will use this collection of pull requests for analysis of things like patterns across PRs of different statuses. For example, we might answer a question like \"how many pull requests were merged week over week across the organization?”",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mitchscobell/RedoxSkills.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mitchscobell/RedoxSkills/issues"
+  },
+  "homepage": "https://github.com/mitchscobell/RedoxSkills#readme",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
