@@ -12,7 +12,7 @@ async function main(): Promise<void> {
   }
 
   if (!process.env.GITHUB_ACCESS_TOKEN) {
-    throw new Error("GITHUB_ACCESS_TOKEN Environment Variable is not defined")
+    throw new Error("GITHUB_ACCESS_TOKEN Environment Variable is not defined");
   }
 
   const org: string = "ramda";

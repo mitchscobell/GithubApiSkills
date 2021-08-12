@@ -1,17 +1,14 @@
 # Redox Skills
 
 ## How to run
-Set your access token in env variables (for example PowerShell)
-``` ps
-$Env:github_access_token = "<my token here!>"
-```
+rename `empty.env` file to `.env` and paste in your github access token.
 
 Set the watch on the ts files
-```
+``` bash
 tsc index.ts -w
 ```
 Run the entry point
-```
+``` bash
 node .\index.js
 ```
 
