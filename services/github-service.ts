@@ -33,6 +33,7 @@ export class GithubService {
       return response.data;
     } catch (error) {
       console.error(error);
+      throw new Error(`Failed to get repositories for ${org}`);
     }
   }
 
@@ -49,6 +50,7 @@ export class GithubService {
       return response.data;
     } catch (error) {
       console.error(error);
+      throw new Error(`Failed to get pull requests for ${org}/${repo}`);
     }
   }
 
