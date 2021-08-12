@@ -17,22 +17,18 @@ async function main(): Promise<void> {
 
   const service = new GithubService();
 
-  const repositories = await service.getRepositoriesForOrg(org);
+  const repositories = await service.getRepositoriesAndPullRequestsForOrg(org);
 
-  let amountOfPullRequests = 0;
-
-  for (var repo of repositories) {
+  const amountOfPullRequests = repositories.reduce((accumulator, repo) => {
     log(chalk.white.bgBlue("Repository Name:") + chalk.cyan(` ${repo.name}`));
-
-    const repoInfo = await service.getPullRequestsForOrgAndRepo(org, repo.name);
 
     log(
       chalk.blue("Number of Pull Requests:") +
-        chalk.magenta(` ${repoInfo.length}`)
+        chalk.magenta(` ${repo.pullRequests.length}`)
     );
 
-    amountOfPullRequests += repoInfo.length;
-  }
+    return accumulator + repo.pullRequests.length;
+  }, 0);
 
   log(
     chalk.red(`\nTotal Number of Pull Requests for `) +

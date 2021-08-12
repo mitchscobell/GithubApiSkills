@@ -10,6 +10,16 @@ export class GithubService {
     this.token = process.env.github_access_token;
   }
 
+  public async getRepositoriesAndPullRequestsForOrg(org: string): Promise<GithubRepository[]> {
+    const repos = await this.getRepositoriesForOrg(org);
+
+    for(var repo of repos) {
+      repo.pullRequests = await this.getPullRequestsForOrgAndRepo(org, repo.name);
+    }
+
+    return repos;
+  }
+
   public async getRepositoriesForOrg(org: string): Promise<GithubRepository[]> {
     try {
       let response = await fetch(
