@@ -9,13 +9,13 @@ async function main(): Promise<void> {
   let amountOfPullRequests = 0;
 
   for (let repo of repositories) {
-    console.log(`Name: ${repo.name}`);
+    console.log(`Repository Name: ${repo.name}`);
     let repoInfo = await service.getPullRequestsForOrgAndRepo(org, repo.name);
-    console.log(`Amount of Pull Requests: ${repoInfo.length}\n`);
+    console.log(`Number of Pull Requests: ${repoInfo.length}\n`);
     amountOfPullRequests += repoInfo.length;
   }
 
-  console.log(`\nTotal Amount of Pull Requests: ${amountOfPullRequests}\n\n`);
+  console.log(`\nTotal Number of Pull Requests for ${org} organization: ${amountOfPullRequests}\n\n`);
 }
 
 main();
