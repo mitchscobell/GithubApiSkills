@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { GithubRepository } from "../models/github-repository.model";
 import { PullRequest } from "../models/pull-request.model";
-const parse = require('parse-link-header');
+const parse = require("parse-link-header");
 
 export class GithubService {
   private readonly urlRoot: string;
@@ -33,6 +33,17 @@ export class GithubService {
         this.getRequestOptions()
       );
 
+      // const linkHeaders = response.headers.link;
+
+      // // iterate through the pages recursively
+      // if (linkHeaders) {
+      //   let parsedLinkHeaders = parse(linkHeaders);
+      //   if (parsedLinkHeaders.next) {
+      //     console.log(`parsed link headers for repos`);
+      //     console.log(parsedLinkHeaders);
+      //   }
+      // }
+
       return response.data;
     } catch (error) {
       console.error(error);
@@ -40,29 +51,43 @@ export class GithubService {
     }
   }
 
+  /// Builds URL and gets pull requests for an Orgs Repo
   public async getPullRequestsForOrgAndRepo(
     org: string,
     repo: string
   ): Promise<PullRequest[]> {
     try {
-      console.log(`${this.urlRoot}/repos/${org}/${repo}/pulls`);
-      const response = await axios.get(
-        `${this.urlRoot}/repos/${org}/${repo}/pulls`,
-        this.getRequestOptions()
-      );
+      const url = `${this.urlRoot}/repos/${org}/${repo}/pulls`;
+      const response = await this.getPullRequests(url);
 
+      return response;
+    } catch (error) {
+      console.error(error);
+      throw new Error(`Failed to get pull requests for ${org}/${repo}`);
+    }
+  }
+
+  /// Recursively gets the pull requests iterating through the pagination
+  private async getPullRequests(url: string): Promise<PullRequest[]> {
+    try {
+      const response = await axios.get(url, this.getRequestOptions());
       const linkHeaders = response.headers.link;
 
-      //TODO iterate through these
+      // iterate through the pages recursively
       if (linkHeaders) {
         let parsedLinkHeaders = parse(linkHeaders);
-        console.log(parsedLinkHeaders);
+        if (parsedLinkHeaders.next) {
+          const nextPage = await this.getPullRequests(
+            parsedLinkHeaders.next.url
+          );
+          response.data.push(...nextPage);
+        }
       }
 
       return response.data;
     } catch (error) {
       console.error(error);
-      throw new Error(`Failed to get pull requests for ${org}/${repo}`);
+      throw new Error(`Failed to get pull requests for ${url}`);
     }
   }
 
