@@ -26,29 +26,28 @@ export class GithubService {
   }
 
   public async getRepositoriesForOrg(org: string): Promise<GithubRepository[]> {
-    try {
-      const response = await axios.get(
-        `${this.urlRoot}/orgs/${org}/repos`,
-        this.getRequestOptions()
-      );
+    const allRepos: GithubRepository[] = [];
 
-      // TODO there aren't any pages yet, but may need to implement some sort of pagination
-      // const linkHeaders = response.headers.link;
+    const fetchRepos = async (url: string): Promise<void> => {
+      try {
+        const response = await axios.get(url, this.getRequestOptions());
+        allRepos.push(...response.data);
 
-      // // iterate through the pages recursively
-      // if (linkHeaders) {
-      //   let parsedLinkHeaders = parse(linkHeaders);
-      //   if (parsedLinkHeaders.next) {
-      //     console.log(`parsed link headers for repos`);
-      //     console.log(parsedLinkHeaders);
-      //   }
-      // }
+        const linkHeaders = response.headers.link;
+        if (linkHeaders) {
+          const parsedLinkHeaders = parse(linkHeaders);
+          if (parsedLinkHeaders.next) {
+            await fetchRepos(parsedLinkHeaders.next.url);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        throw new Error(`Failed to get repositories for ${org}`);
+      }
+    };
 
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      throw new Error(`Failed to get repositories for ${org}`);
-    }
+    await fetchRepos(`${this.urlRoot}/orgs/${org}/repos`);
+    return allRepos;
   }
 
   /// Builds URL and gets pull requests for an Orgs Repo
@@ -81,7 +80,7 @@ export class GithubService {
         let parsedLinkHeaders = parse(linkHeaders);
         if (parsedLinkHeaders.next) {
           const nextPage = await this.getPullRequests(
-            parsedLinkHeaders.next.url + '&state=all'
+            parsedLinkHeaders.next.url + "&state=all"
           );
           response.data.push(...nextPage);
         }
