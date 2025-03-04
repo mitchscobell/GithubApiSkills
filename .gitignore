@@ -67,3 +67,6 @@ build/
 
 # Output of 'npm pack'
 *.
+
+# .env file
+.env

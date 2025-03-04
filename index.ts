@@ -1,14 +1,17 @@
 import { GithubService } from "./services/github-service";
-const chalk = require("chalk");
-const dotenv = require("dotenv").config();
+import chalk from "chalk";
+import dotenv from "dotenv";
+import ora from "ora";
 
 async function main(): Promise<void> {
-  // initialize the console
   const log = console.log;
   console.clear();
 
-  if (dotenv.error) {
-    throw dotenv.error;
+  // Capture the result of dotenv.config()
+  const configResult = dotenv.config();
+
+  if (configResult.error) {
+    throw configResult.error;
   }
 
   if (!process.env.GITHUB_ACCESS_TOKEN) {
@@ -17,35 +20,45 @@ async function main(): Promise<void> {
 
   const org: string = "ramda";
 
-  log(
-    chalk.white.bgRed("Loading data for ") +
+  const spinner = ora({
+    text:
+      chalk.white.bgRed("Loading data for ") +
       chalk.white.bgGreen.bold(org) +
-      chalk.white.bgRed(" organization") +
-      "\n"
-  );
+      chalk.white.bgRed(" organization"),
+    spinner: "dots",
+  }).start();
 
   const service = new GithubService(process.env.GITHUB_ACCESS_TOKEN);
 
-  const repositories = await service.getRepositoriesAndPullRequestsForOrg(org);
-
-  const amountOfPullRequests = repositories.reduce((accumulator, repo) => {
-    log(chalk.white.bgBlue("Repository Name:") + chalk.cyan(` ${repo.name}`));
-
-    log(
-      chalk.blue("Number of Pull Requests:") +
-        chalk.magenta(` ${repo.pullRequests.length}`)
+  try {
+    const repositories = await service.getRepositoriesAndPullRequestsForOrg(
+      org
     );
 
-    return accumulator + repo.pullRequests.length;
-  }, 0);
+    spinner.succeed("Data loaded successfully");
 
-  log(
-    chalk.red(`\nTotal Number of Pull Requests for `) +
-      chalk.black.bgGreen.bold(`${org}`) +
-      chalk.red(` organization: `) +
-      chalk.green(`${amountOfPullRequests}`) +
-      `\n`
-  );
+    const amountOfPullRequests = repositories.reduce((accumulator, repo) => {
+      log(chalk.white.bgBlue("Repository Name:") + chalk.cyan(` ${repo.name}`));
+      log(
+        chalk.blue("Number of Pull Requests:") +
+          chalk.magenta(` ${repo.pullRequests.length}`)
+      );
+      return accumulator + repo.pullRequests.length;
+    }, 0);
+
+    log(
+      chalk.red(`\nTotal Number of Pull Requests for `) +
+        chalk.black.bgGreen.bold(`${org}`) +
+        chalk.red(` organization: `) +
+        chalk.green(`${amountOfPullRequests}`) +
+        `\n`
+    );
+  } catch (error) {
+    // Type error as Error (or handle as unknown)
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    spinner.fail(`Failed to load data: ${errorMessage}`);
+    throw error;
+  }
 }
 
 main();
