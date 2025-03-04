@@ -8,7 +8,8 @@
     "esModuleInterop": true /* Necessary for chalk, dotenv imports */,
     "skipLibCheck": true /* Speeds up compilation */,
     "forceConsistentCasingInFileNames": true /* Good practice */,
-    "noEmitOnError": true /* Prevents bad .js files */
+    "noEmitOnError": true /* Prevents bad .js files */,
+    "sourceMap": true /* This generates .js.map files in build/ alongside .js files */
   },
   "include": ["**/*.ts"] /* Compile all .ts files */,
   "exclude": ["node_modules", "build"] /* Ignore these */
