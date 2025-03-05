@@ -1,0 +1,29 @@
+✔ Data loaded successfully
+Fetching data for ramda: 30.916s
+Repository Details:
+Repository Name: ramda
+Number of Pull Requests: 1793
+Repository Name: ramdangular
+Number of Pull Requests: 2
+Repository Name: ramda.github.io
+Number of Pull Requests: 181
+Repository Name: ramda-fantasy
+Number of Pull Requests: 101
+Repository Name: jsdelivr
+Number of Pull Requests: 0
+Repository Name: cdnjs
+Number of Pull Requests: 0
+Repository Name: ramda-logic
+Number of Pull Requests: 11
+Repository Name: ramda-highland
+Number of Pull Requests: 0
+Repository Name: ramda-lens
+Number of Pull Requests: 13
+Repository Name: repl
+Number of Pull Requests: 39
+Repository Name: eslint-plugin-ramda
+Number of Pull Requests: 18
+Repository Name: types
+Number of Pull Requests: 76
+
+Total Number of Pull Requests for ramda organization: 2234

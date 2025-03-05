@@ -7,56 +7,62 @@ async function main(): Promise<void> {
   const log = console.log;
   console.clear();
 
-  // Capture the result of dotenv.config()
   const configResult = dotenv.config();
-
-  if (configResult.error) {
-    throw configResult.error;
-  }
-
-  if (!process.env.GITHUB_ACCESS_TOKEN) {
-    throw new Error("GITHUB_ACCESS_TOKEN Environment Variable is not defined");
-  }
+  if (configResult.error) throw configResult.error;
+  if (!process.env.GITHUB_ACCESS_TOKEN)
+    throw new Error("GITHUB_ACCESS_TOKEN missing");
 
   const org: string = "ramda";
+  const service = new GithubService(process.env.GITHUB_ACCESS_TOKEN);
+
+  const totalRepos = await service.getRepoCountForOrg(org);
+  let fetchedRepos = 0;
+  let fetchedPRs = 0;
 
   const spinner = ora({
-    text:
-      chalk.white.bgRed("Loading data for ") +
-      chalk.white.bgGreen.bold(org) +
-      chalk.white.bgRed(" organization"),
+    text: `Fetching ${fetchedRepos} of ${totalRepos} repos (${fetchedPRs} PRs) for ${chalk.white.bgGreen.bold(
+      org
+    )}`,
     spinner: "dots",
   }).start();
 
-  const service = new GithubService(process.env.GITHUB_ACCESS_TOKEN);
-
   try {
+    console.time(`Fetching data for ${org}`);
     const repositories = await service.getRepositoriesAndPullRequestsForOrg(
-      org
+      org,
+      (repos, prs) => {
+        fetchedRepos = repos;
+        fetchedPRs = prs;
+        spinner.text = `Fetching ${fetchedRepos} of ${totalRepos} repos (${fetchedPRs} PRs) for ${chalk.white.bgGreen.bold(
+          org
+        )}`;
+      }
     );
 
-    spinner.succeed("Data loaded successfully");
+    spinner.succeed(
+      `Fetched ${fetchedRepos} of ${totalRepos} repos (${fetchedPRs} PRs) for ${org}`
+    );
+    console.timeEnd(`Fetching data for ${org}`);
 
-    const amountOfPullRequests = repositories.reduce((accumulator, repo) => {
+    log(chalk.white.bgBlue("Repository Details:"));
+    repositories.forEach((repo) => {
       log(chalk.white.bgBlue("Repository Name:") + chalk.cyan(` ${repo.name}`));
       log(
         chalk.blue("Number of Pull Requests:") +
           chalk.magenta(` ${repo.pullRequests.length}`)
       );
-      return accumulator + repo.pullRequests.length;
-    }, 0);
+    });
 
     log(
       chalk.red(`\nTotal Number of Pull Requests for `) +
         chalk.black.bgGreen.bold(`${org}`) +
         chalk.red(` organization: `) +
-        chalk.green(`${amountOfPullRequests}`) +
+        chalk.green(`${fetchedPRs}`) +
         `\n`
     );
   } catch (error) {
-    // Type error as Error (or handle as unknown)
     const errorMessage = error instanceof Error ? error.message : String(error);
-    spinner.fail(`Failed to load data: ${errorMessage}`);
+    spinner.fail(`Failed: ${errorMessage}`);
     throw error;
   }
 }

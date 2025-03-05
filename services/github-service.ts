@@ -11,86 +11,83 @@ export class GithubService {
   }
 
   public async getRepositoriesAndPullRequestsForOrg(
-    org: string
+    org: string,
+    onProgress?: (fetchedRepos: number, fetchedPRs: number) => void
   ): Promise<GithubRepository[]> {
-    const repositories = await this.getRepositoriesForOrg(org);
+    const repositories = await this.getRepositoriesForOrg(org, (repos) => {
+      if (onProgress) onProgress(repos, 0); // Update repo count
+    });
 
-    // TODO parallelize this
-    for (var repo of repositories) {
+    let totalPRs = 0;
+    for (const repo of repositories) {
       repo.pullRequests = await this.getPullRequestsForOrgAndRepo(
         org,
-        repo.name
+        repo.name,
+        (prs) => {
+          totalPRs += prs; // Increment PRs per page
+          if (onProgress) onProgress(repositories.length, totalPRs);
+        }
       );
     }
     return repositories;
   }
 
-  public async getRepositoriesForOrg(org: string): Promise<GithubRepository[]> {
+  public async getRepositoriesForOrg(
+    org: string,
+    onProgress?: (fetchedRepos: number) => void
+  ): Promise<GithubRepository[]> {
     const allRepos: GithubRepository[] = [];
 
     const fetchRepos = async (url: string): Promise<void> => {
-      try {
-        const response = await axios.get(url, this.getRequestOptions());
-        allRepos.push(...response.data);
+      const response = await axios.get(url, this.getRequestOptions());
+      allRepos.push(...response.data);
+      if (onProgress) onProgress(allRepos.length); // Update after each page
 
-        const linkHeaders = response.headers.link;
-        if (linkHeaders) {
-          const parsedLinkHeaders = parse(linkHeaders);
-          if (parsedLinkHeaders.next) {
-            await fetchRepos(parsedLinkHeaders.next.url);
-          }
+      const linkHeaders = response.headers.link;
+      if (linkHeaders) {
+        const parsed = parse(linkHeaders);
+        if (parsed.next) {
+          await fetchRepos(parsed.next.url);
         }
-      } catch (error) {
-        console.error(error);
-        throw new Error(`Failed to get repositories for ${org}`);
       }
     };
 
-    await fetchRepos(`${this.urlRoot}/orgs/${org}/repos`);
-    return allRepos;
+    try {
+      await fetchRepos(`${this.urlRoot}/orgs/${org}/repos`);
+      return allRepos;
+    } catch (error) {
+      throw new Error(`Failed to get repositories for ${org}`);
+    }
   }
 
-  /// Builds URL and gets pull requests for an Orgs Repo
   public async getPullRequestsForOrgAndRepo(
     org: string,
-    repo: string
+    repo: string,
+    onPRProgress?: (fetchedPRs: number) => void
   ): Promise<PullRequest[]> {
-    try {
-      //TODO parameterize state into an enum of the states
-      const url = `${this.urlRoot}/repos/${org}/${repo}/pulls?state=all`;
-      const response = await this.getPullRequests(url);
-
-      return response;
-    } catch (error) {
-      console.error(error);
-      throw new Error(`Failed to get pull requests for ${org}/${repo}`);
-    }
+    const url = `${this.urlRoot}/repos/${org}/${repo}/pulls?state=all`;
+    return await this.getPullRequests(url, onPRProgress);
   }
 
-  /// Recursively gets the pull requests iterating through the pagination
-  private async getPullRequests(url: string): Promise<PullRequest[]> {
-    try {
-      const response = await axios.get(url, this.getRequestOptions());
-      const linkHeaders = response.headers.link;
+  private async getPullRequests(
+    url: string,
+    onPRProgress?: (fetchedPRs: number) => void
+  ): Promise<PullRequest[]> {
+    const response = await axios.get(url, this.getRequestOptions());
+    if (onPRProgress) onPRProgress(response.data.length); // Update per page
 
-      //TODO parameterize state into an enum of the states
-
-      // iterate through the pages recursively
-      if (linkHeaders) {
-        let parsedLinkHeaders = parse(linkHeaders);
-        if (parsedLinkHeaders.next) {
-          const nextPage = await this.getPullRequests(
-            parsedLinkHeaders.next.url + "&state=all"
-          );
-          response.data.push(...nextPage);
-        }
+    const linkHeaders = response.headers.link;
+    if (linkHeaders) {
+      const parsed = parse(linkHeaders);
+      if (parsed.next) {
+        const nextPage = await this.getPullRequests(
+          parsed.next.url + "&state=all",
+          onPRProgress
+        );
+        response.data.push(...nextPage);
       }
-
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      throw new Error(`Failed to get pull requests for ${url}`);
     }
+    return response.data;
   }
 
   private getRequestOptions(): AxiosRequestConfig {
@@ -99,5 +96,22 @@ export class GithubService {
         Authorization: `Bearer ${this.token}`,
       },
     };
+  }
+
+  public async getRepoCountForOrg(org: string): Promise<number> {
+    const response = await axios.get(
+      `${this.urlRoot}/orgs/${org}/repos`,
+      this.getRequestOptions()
+    );
+    const linkHeaders = response.headers.link;
+    if (linkHeaders) {
+      const parsed = parse(linkHeaders);
+      if (parsed.last) {
+        const lastPage = parseInt(parsed.last.page, 10);
+        const perPage = response.data.length;
+        return lastPage * perPage;
+      }
+    }
+    return response.data.length;
   }
 }
