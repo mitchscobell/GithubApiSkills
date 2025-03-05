@@ -2,6 +2,8 @@ import axios from "axios";
 import { GithubRepository } from "../models/github-repository.model";
 import { PullRequest } from "../models/pull-request.model";
 const parse = require("parse-link-header");
+const MILLISECONDS = 1000;
+const SECONDS = 60;
 
 /**
  * Github service class to interact with the GitHub API for fetching repository and pull request data.
@@ -102,7 +104,7 @@ export class GithubService {
    * Recursively fetches pull requests from a given URL, handling pagination.
    * @param url - The API URL to fetch pull requests from.
    * @param onPRProgress - Optional callback to report the number of fetched pull requests per page.
-   * @returns A promise resolving to an array of PullRequest objects.
+   * @returns A promise resolving to an array of PullRequest objects with calculated open-to-merge time.
    * @throws {Error} If the API request fails.
    */
   private async getPullRequests(
@@ -113,8 +115,15 @@ export class GithubService {
       url,
       this.getRequestOptions()
     );
-    const prs: PullRequest[] = [...response.data]; // Create a new array
-    if (onPRProgress) onPRProgress(response.data.length);
+    const prs: PullRequest[] = response.data.map((pr) => ({
+      ...pr,
+      openToMergeTime: pr.merged_at
+        ? (new Date(pr.merged_at).getTime() -
+            new Date(pr.created_at).getTime()) /
+          (MILLISECONDS * SECONDS)
+        : null, // Minutes or null if not merged
+    }));
+    if (onPRProgress) onPRProgress(prs.length);
 
     const linkHeaders = response.headers.link;
     if (linkHeaders) {

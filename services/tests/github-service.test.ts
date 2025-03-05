@@ -2,8 +2,7 @@ import { GithubService } from "../github-service";
 import axios from "axios";
 import { mocked } from "jest-mock";
 
-// Mock axios
-jest.mock("axios");
+jest.mock("axios"); // Mock axios
 const mockedAxios = mocked(axios);
 
 describe("Testing GithubService", () => {
@@ -98,7 +97,18 @@ describe("Testing GithubService", () => {
 
   describe("Testing getPullRequestsForOrgAndRepo(...)", () => {
     it("should fetch PRs without pagination", async () => {
-      const mockPRs = [{ id: 1, title: "PR1" }];
+      const mockPRs = [
+        {
+          id: 1,
+          title: "PR1",
+          nodeId: "PR_1",
+          body: "Body",
+          number: 1,
+          state: "closed",
+          created_at: "2023-01-01T12:00:00Z",
+          merged_at: "2023-01-01T12:30:00Z",
+        },
+      ];
       mockedAxios.get.mockResolvedValueOnce({ data: mockPRs, headers: {} });
 
       const result = await service.getPullRequestsForOrgAndRepo(
@@ -110,12 +120,39 @@ describe("Testing GithubService", () => {
         "https://api.github.com/repos/test-org/test-repo/pulls?state=all",
         expect.any(Object)
       );
-      expect(result).toEqual(mockPRs);
+      expect(result).toEqual([
+        {
+          ...mockPRs[0],
+          openToMergeTime: 30, // (12:30 - 12:00) = 30 minutes
+        },
+      ]);
     });
 
     it("should fetch PRs with pagination and updates progress", async () => {
-      const page1 = [{ id: 1, title: "PR1" }];
-      const page2 = [{ id: 2, title: "PR2" }];
+      const page1 = [
+        {
+          id: 1,
+          title: "PR1",
+          nodeId: "PR_1",
+          body: "Body1",
+          number: 1,
+          state: "closed",
+          created_at: "2023-01-01T12:00:00Z",
+          merged_at: "2023-01-01T12:30:00Z",
+        },
+      ];
+      const page2 = [
+        {
+          id: 2,
+          title: "PR2",
+          nodeId: "PR_2",
+          body: "Body2",
+          number: 2,
+          state: "open",
+          created_at: "2023-01-02T12:00:00Z",
+          merged_at: null,
+        },
+      ];
       mockedAxios.get
         .mockResolvedValueOnce({
           data: page1,
@@ -134,11 +171,25 @@ describe("Testing GithubService", () => {
 
       expect(mockedAxios.get).toHaveBeenCalledTimes(2);
       expect(onPRProgress).toHaveBeenCalledWith(1); // First page
-      expect(result).toEqual([...page1, ...page2]);
+      expect(result).toEqual([
+        { ...page1[0], openToMergeTime: 30 }, // 30 minutes
+        { ...page2[0], openToMergeTime: null }, // Not merged
+      ]);
     });
 
     it("should fetch PRs with link header but no next page", async () => {
-      const mockPRs = [{ id: 1, title: "PR1" }];
+      const mockPRs = [
+        {
+          id: 1,
+          title: "PR1",
+          nodeId: "PR_1",
+          body: "Body",
+          number: 1,
+          state: "closed",
+          created_at: "2023-01-01T12:00:00Z",
+          merged_at: "2023-01-01T13:00:00Z",
+        },
+      ];
       mockedAxios.get.mockResolvedValueOnce({
         data: mockPRs,
         headers: {
@@ -152,14 +203,25 @@ describe("Testing GithubService", () => {
       );
 
       expect(mockedAxios.get).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockPRs);
+      expect(result).toEqual([{ ...mockPRs[0], openToMergeTime: 60 }]); // 60 minutes
     });
   });
 
   describe("Testing getRepositoriesAndPullRequestsForOrg(...)", () => {
     it("should fetch repos and PRs with progress", async () => {
       const mockRepos = [{ name: "repo1", pullRequests: [] }];
-      const mockPRs = [{ id: 1, title: "PR1" }];
+      const mockPRs = [
+        {
+          id: 1,
+          title: "PR1",
+          nodeId: "PR_1",
+          body: "Body",
+          number: 1,
+          state: "closed",
+          created_at: "2023-01-01T12:00:00Z",
+          merged_at: "2023-01-01T12:45:00Z",
+        },
+      ];
       mockedAxios.get
         .mockResolvedValueOnce({ data: mockRepos, headers: {} }) // Repos
         .mockResolvedValueOnce({ data: mockPRs, headers: {} }); // PRs
@@ -172,7 +234,12 @@ describe("Testing GithubService", () => {
 
       expect(onProgress).toHaveBeenCalledWith(1, 0); // After repos
       expect(onProgress).toHaveBeenCalledWith(1, 1); // After PRs
-      expect(result).toEqual([{ name: "repo1", pullRequests: mockPRs }]);
+      expect(result).toEqual([
+        {
+          name: "repo1",
+          pullRequests: [{ ...mockPRs[0], openToMergeTime: 45 }],
+        },
+      ]); // 45 minutes
     });
   });
 
