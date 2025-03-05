@@ -62,6 +62,21 @@ describe("Testing GithubService", () => {
       expect(result).toEqual([...page1, ...page2]);
     });
 
+    it("should fetch repositories with link header but no next page", async () => {
+      const mockRepos = [{ name: "repo1" }, { name: "repo2" }];
+      mockedAxios.get.mockResolvedValueOnce({
+        data: mockRepos,
+        headers: {
+          link: '<https://api.github.com/orgs/test-org/repos?page=1>; rel="last"',
+        },
+      });
+
+      const result = await service.getRepositoriesForOrg("test-org");
+
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockRepos);
+    });
+
     it("should call onProgress with repo count", async () => {
       const mockRepos = [{ name: "repo1" }];
       mockedAxios.get.mockResolvedValueOnce({ data: mockRepos, headers: {} });
@@ -121,6 +136,24 @@ describe("Testing GithubService", () => {
       expect(onPRProgress).toHaveBeenCalledWith(1); // First page
       expect(result).toEqual([...page1, ...page2]);
     });
+
+    it("should fetch PRs with link header but no next page", async () => {
+      const mockPRs = [{ id: 1, title: "PR1" }];
+      mockedAxios.get.mockResolvedValueOnce({
+        data: mockPRs,
+        headers: {
+          link: '<https://api.github.com/repos/test-org/test-repo/pulls?page=1>; rel="last"',
+        },
+      });
+
+      const result = await service.getPullRequestsForOrgAndRepo(
+        "test-org",
+        "test-repo"
+      );
+
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockPRs);
+    });
   });
 
   describe("Testing getRepositoriesAndPullRequestsForOrg(...)", () => {
@@ -164,6 +197,20 @@ describe("Testing GithubService", () => {
       const count = await service.getRepoCountForOrg("test-org");
 
       expect(count).toBe(90); // 3 pages * 30
+    });
+
+    it("should estimate repo count with link header but no last page", async () => {
+      const mockRepos = [{ name: "repo1" }, { name: "repo2" }];
+      mockedAxios.get.mockResolvedValueOnce({
+        data: mockRepos,
+        headers: {
+          link: '<https://api.github.com/orgs/test-org/repos?page=2>; rel="next"',
+        },
+      });
+
+      const count = await service.getRepoCountForOrg("test-org");
+
+      expect(count).toBe(2);
     });
   });
 });
