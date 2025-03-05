@@ -3,6 +3,12 @@ import chalk from "chalk";
 import dotenv from "dotenv";
 import ora from "ora";
 
+/**
+ * Main entry point for the GitHub API Test application.
+ * Fetches and displays pull request data for the Ramda organization from the GitHub API.
+ * @returns A promise that resolves when the operation completes successfully.
+ * @throws {Error} If environment setup fails or API requests encounter errors.
+ */
 async function main(): Promise<void> {
   const log = console.log;
   console.clear();
