@@ -24,6 +24,7 @@
      ```
 
 4. **Run the App**:
+
    - Execute the compiled app:
      ```bash
      npm start
@@ -34,7 +35,16 @@
      ```
      (This uses `ts-node` to run the TypeScript files directly without a separate build step.)
 
-**Note**: Version 2.0.0 introduces a build step where compiled `.js` files are output to a `build/` folder, which is ignored by `.gitignore`. This keeps source `.ts` files separate from generated `.js` files.
+5. **Run Tests**:
+   - Execute the unit tests to verify the code:
+     ```bash
+     npm run test
+     ```
+   - To run tests and generate a coverage report:
+     ```bash
+     npm run test:coverage
+     ```
+     (This outputs a detailed report in the `coverage/` folder, including an HTML view at `coverage/lcov-report/index.html`.)
 
 ## What
 
