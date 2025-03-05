@@ -1,21 +1,32 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { GithubRepository } from "../models/github-repository.model";
 import { PullRequest } from "../models/pull-request.model";
 const parse = require("parse-link-header");
 
+/**
+ * Github service class to interact with the GitHub API for fetching repository and pull request data.
+ */
 export class GithubService {
-  private readonly urlRoot: string;
+  private readonly urlRoot: string = "https://api.github.com";
 
-  constructor(private token: string) {
-    this.urlRoot = `https://api.github.com`;
-  }
+  /**
+   * Constructs a new GithubService instance with the passed authentication token.
+   * @param token - GitHub API access token for authentication (example: 'ghp_xxx')
+   */
+  constructor(private token: string) {}
 
+  /**
+   * Fetches all repositories and their associated pull requests for a given organization.
+   * @param org - The GitHub organization name (e.g., "ramda").
+   * @param onProgress - Optional callback to report progress as repos and PRs are fetched.
+   * @returns A promise resolving to an array of GithubRepository objects with pull requests.
+   */
   public async getRepositoriesAndPullRequestsForOrg(
     org: string,
     onProgress?: (fetchedRepos: number, fetchedPRs: number) => void
   ): Promise<GithubRepository[]> {
     const repositories = await this.getRepositoriesForOrg(org, (repos) => {
-      if (onProgress) onProgress(repos, 0); // Update repo count
+      if (onProgress) onProgress(repos, 0);
     });
 
     let totalPRs = 0;
@@ -24,7 +35,7 @@ export class GithubService {
         org,
         repo.name,
         (prs) => {
-          totalPRs += prs; // Increment PRs per page
+          totalPRs += prs;
           if (onProgress) onProgress(repositories.length, totalPRs);
         }
       );
@@ -32,6 +43,13 @@ export class GithubService {
     return repositories;
   }
 
+  /**
+   * Retrieves all repositories for a specified GitHub organization, handling pagination.
+   * @param org - The GitHub organization name (e.g., "ramda").
+   * @param onProgress - Optional callback to report the number of fetched repositories.
+   * @returns A promise resolving to an array of GithubRepository objects.
+   * @throws {Error} If the API request fails.
+   */
   public async getRepositoriesForOrg(
     org: string,
     onProgress?: (fetchedRepos: number) => void
@@ -39,9 +57,12 @@ export class GithubService {
     const allRepos: GithubRepository[] = [];
 
     const fetchRepos = async (url: string): Promise<void> => {
-      const response = await axios.get(url, this.getRequestOptions());
+      const response = await axios.get<GithubRepository[]>(
+        url,
+        this.getRequestOptions()
+      );
       allRepos.push(...response.data);
-      if (onProgress) onProgress(allRepos.length); // Update after each page
+      if (onProgress) onProgress(allRepos.length);
 
       const linkHeaders = response.headers.link;
       if (linkHeaders) {
@@ -60,6 +81,14 @@ export class GithubService {
     }
   }
 
+  /**
+   * Fetches all pull requests for a specific repository within an organization.
+   * @param org - The GitHub organization name.
+   * @param repo - The repository name within the organization.
+   * @param onPRProgress - Optional callback to report the number of fetched pull requests.
+   * @returns A promise resolving to an array of PullRequest objects.
+   * @throws {Error} If the API request fails.
+   */
   public async getPullRequestsForOrgAndRepo(
     org: string,
     repo: string,
@@ -69,12 +98,23 @@ export class GithubService {
     return await this.getPullRequests(url, onPRProgress);
   }
 
+  /**
+   * Recursively fetches pull requests from a given URL, handling pagination.
+   * @param url - The API URL to fetch pull requests from.
+   * @param onPRProgress - Optional callback to report the number of fetched pull requests per page.
+   * @returns A promise resolving to an array of PullRequest objects.
+   * @throws {Error} If the API request fails.
+   */
   private async getPullRequests(
     url: string,
     onPRProgress?: (fetchedPRs: number) => void
   ): Promise<PullRequest[]> {
-    const response = await axios.get(url, this.getRequestOptions());
-    if (onPRProgress) onPRProgress(response.data.length); // Update per page
+    const response = await axios.get<PullRequest[]>(
+      url,
+      this.getRequestOptions()
+    );
+    const prs: PullRequest[] = [...response.data]; // Create a new array
+    if (onPRProgress) onPRProgress(response.data.length);
 
     const linkHeaders = response.headers.link;
     if (linkHeaders) {
@@ -84,13 +124,17 @@ export class GithubService {
           parsed.next.url + "&state=all",
           onPRProgress
         );
-        response.data.push(...nextPage);
+        prs.push(...nextPage);
       }
     }
-    return response.data;
+    return prs;
   }
 
-  private getRequestOptions(): AxiosRequestConfig {
+  /**
+   * Generates the request options for GitHub API calls, including authentication headers.
+   * @returns An object containing the headers with the authorization token.
+   */
+  private getRequestOptions(): { headers: { Authorization: string } } {
     return {
       headers: {
         Authorization: `Bearer ${this.token}`,
@@ -98,8 +142,14 @@ export class GithubService {
     };
   }
 
+  /**
+   * Estimates the total number of repositories for an organization based on the first API response.
+   * @param org - The GitHub organization name.
+   * @returns A promise resolving to the estimated total number of repositories.
+   * @throws {Error} If the API request fails.
+   */
   public async getRepoCountForOrg(org: string): Promise<number> {
-    const response = await axios.get(
+    const response = await axios.get<GithubRepository[]>(
       `${this.urlRoot}/orgs/${org}/repos`,
       this.getRequestOptions()
     );
